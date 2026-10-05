@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>timeline-maker-web · 项目时间线</title>
+<style>
+  body { margin:0; background:#0f172a; color:#e2e8f0; padding:24px;
+         font-family: system-ui, "PingFang SC", sans-serif; }
+  h1 { font-size:20px; }
+  .group { margin:18px 0; }
+  .group h2 { font-size:14px; color:#38bdf8; border-bottom:1px solid #1e293b;
+              padding-bottom:6px; }
+  .item { display:flex; gap:14px; padding:8px 0; }
+  .item .date { width:110px; color:#94a3b8; font-size:13px; flex:none; }
+  .item .text { font-size:14px; }
+</style>
+</head>
+<body>
+  <h1>项目里程碑时间线</h1>
+  <div id="timeline"></div>
+
+<script id="timeline-data" type="application/json">
+[
+  {"date": "2026-03-10", "group": "立项", "text": "需求评审通过，项目正式启动"},
+  {"date": "2026-05-01", "group": "开发", "text": "完成核心功能开发"},
+  {"date": "2026-04-15", "group": "开发", "text": "完成数据库设计与接口联调"},
+  {"date": "2026-06-20", "group": "上线", "text": "灰度发布 10% 流量"},
+  {"date": "2026-07-01", "group": "上线", "text": "全量发布"}
+]
+</script>
+<script>
+(function () {
+  var raw = JSON.parse(document.getElementById('timeline-data').textContent);
+
+  // 1) 按日期升序排序
+  var events = raw.slice().sort(function (a, b) {
+    return new Date(a.date) - new Date(b.date);
+  });
+
+  // 2) 按 group 分组，组内仍保持日期升序
+  var groups = {};
+  events.forEach(function (e) {
+    if (!groups[e.group]) groups[e.group] = [];
+    groups[e.group].push(e);
+  });
+  window.__groups = groups;
+
+  var root = document.getElementById('timeline');
+  Object.keys(groups).forEach(function (g) {
+    var gEl = document.createElement('div');
+    gEl.className = 'group';
+    gEl.innerHTML = '<h2>' + g + '</h2>';
+    groups[g].forEach(function (e) {
+      var row = document.createElement('div');
+      row.className = 'item';
+      row.innerHTML = '<div class="date">' + e.date + '</div>' +
+                      '<div class="text">' + e.text + '</div>';
+      gEl.appendChild(row);
+    });
+    root.appendChild(gEl);
+  });
+})();
+</script>
+</body>
+</html>
